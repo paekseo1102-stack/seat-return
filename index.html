@@ -1,0 +1,645 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<meta name="robots" content="noindex, nofollow">
+<title>헤론즈 공식 재판매 프로토타입</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+/* ------------------------------------------------------------------
+   모양(CSS). 색과 크기는 아래 :root 한 곳에서 바꾼다.
+   원칙: 흰 바탕, 검은 글자, 색은 '공식 재판매'에만 쓴다.
+------------------------------------------------------------------ */
+:root{
+  --ground:#ffffff; --band:#f4f4f5; --line:#e9e9e9; --rule:#f1f1f1; --control:#d4d4d4;
+  --ink:#111111; --sub:#5f6368; --off:#767676;
+  --resale:#e8490f; --resale-ink:#c2390a; --resale-bg:#fff1ea;
+  --ok-ink:#0b4a2b; --ok-bg:#dcfae5; --wait-ink:#3d3d3d; --wait-bg:#eeeeee;
+  --stage:#e9eaec;
+  --r-card:8px; --r-chip:4px;
+  --font:"Pretendard Variable",Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR","Malgun Gothic",sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font);color:var(--ink);background:var(--stage);font-size:15px;line-height:1.5;
+  word-break:keep-all;overflow-wrap:anywhere;-webkit-font-smoothing:antialiased;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;text-align:inherit}
+button:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+button{transition:opacity .1s,background-color .1s}
+.btn:active,.pbar .go:active,.push:active{opacity:.82}
+.li:active:not([disabled]),.btn.ghost:active,.pbar .re:active{background:var(--band)}
+.tabs button:active,.btn.text:active,.nav .back:active{opacity:.55}
+.num{font-variant-numeric:tabular-nums}
+.nowrap{white-space:nowrap}
+
+/* 프로토타입 조작 막대 (앱 바깥) */
+.pbar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;background:#fff;border-bottom:1px solid var(--line);font-size:13px;color:var(--sub)}
+.pbar b{color:var(--ink);font-weight:600}
+.pbar .grp{display:flex;align-items:center;gap:6px}
+.pbar .seg{display:flex;border:1px solid var(--control);border-radius:6px;overflow:hidden}
+.pbar .seg button{height:36px;padding:0 10px;font-size:13px;color:var(--sub)}
+.pbar .seg button[aria-pressed="true"]{background:var(--ink);color:#fff}
+.pbar .go{height:36px;padding:0 12px;border-radius:6px;background:var(--ink);color:#fff;font-size:13px;font-weight:600}
+.pbar .go[disabled]{background:var(--wait-bg);color:var(--off);cursor:default}
+.pbar .re{height:36px;padding:0 10px;border-radius:6px;border:1px solid var(--control);font-size:13px}
+.pbar .sp{flex:1}
+
+.stage{display:flex;justify-content:center;align-items:flex-start;gap:40px;padding:28px 16px 40px;flex-wrap:wrap}
+.unit{display:flex;flex-direction:column;align-items:center;gap:10px}
+.unit h2{font-size:13px;font-weight:600;color:var(--sub)}
+.device{width:390px;height:800px;border:10px solid #111;border-radius:46px;overflow:hidden;background:var(--ground);position:relative}
+.app{height:100%;display:flex;flex-direction:column;position:relative;background:var(--ground)}
+.sbar{height:38px;flex:none;display:flex;align-items:flex-end;justify-content:space-between;padding:0 28px 6px;font-size:13px;font-weight:600}
+.sbar span:last-child{font-size:11px;letter-spacing:1px}
+
+/* 화면 뼈대 */
+h1{font:inherit;margin:0}
+.nav{height:48px;flex:none;display:flex;align-items:center;justify-content:center;position:relative;font-size:17px;font-weight:600}
+.nav .back{position:absolute;left:4px;top:2px;width:44px;height:44px;display:flex;align-items:center;justify-content:center}
+.big{flex:none;padding:10px 20px 8px;font-size:22px;line-height:1.3;font-weight:700;letter-spacing:-.02em}
+.body{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.pad{padding:16px 20px}
+.band{height:8px;background:var(--band)}
+.h{font-size:17px;font-weight:700;letter-spacing:-.01em}
+.p{font-size:15px;color:var(--ink);margin-top:6px}
+.note{font-size:13px;color:var(--sub);margin-top:10px}
+.match{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.teams{display:grid;gap:6px}
+.teams div{display:flex;align-items:center;gap:10px}
+.teams i{flex:none;width:4px;height:20px;border-radius:2px}
+.teams b{font-size:20px;font-weight:700;letter-spacing:-.02em}
+.teams span{font-size:12px;color:var(--sub)}
+.when{font-size:15px;color:var(--sub);margin-top:4px}
+.row2{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.chip{flex:none;font-size:12px;font-weight:600;border-radius:var(--r-chip);padding:3px 7px;white-space:nowrap;background:var(--wait-bg);color:var(--wait-ink)}
+.chip.rs{background:var(--resale-bg);color:var(--resale-ink)}
+.chip.ok{background:var(--ok-bg);color:var(--ok-ink)}
+.hue{color:var(--resale-ink);font-weight:600}
+
+/* 상태 줄 */
+.state{display:flex;justify-content:space-between;align-items:center;margin-top:14px;padding:12px 14px;border-radius:var(--r-card);background:var(--band);font-size:15px}
+.state b{font-weight:600}
+
+/* 표 (구역별 자리, 금액 내역) */
+table{width:100%;border-collapse:collapse;margin-top:12px}
+th,td{font-size:15px;padding:11px 0;border-bottom:1px solid var(--rule);text-align:left;font-weight:400}
+th{font-size:12px;color:var(--sub);padding:0 0 8px;border-bottom:1px solid var(--line)}
+td.r,th.r{text-align:right;white-space:nowrap}
+tr.sum td{font-weight:700;border-bottom:0}
+
+/* 시간 띠: 오늘, 마감, 오픈, 경기 */
+.strip{display:flex;margin-top:16px}
+.strip .st{flex:1;min-width:0;position:relative;padding-top:16px;text-align:center}
+.strip .st:before,.strip .st:after{content:"";position:absolute;top:4px;height:2px}
+.strip .st:before{left:0;right:0;background:var(--line)}
+.strip .st:first-child:before{left:50%}.strip .st:last-child:before{right:50%}
+.strip .st.done:after{left:0;right:0;background:var(--ink)}
+.strip .st.now:after{left:0;right:50%;background:var(--ink)}
+.strip .st.done:first-child:after{left:50%}.strip .st.done:last-child:after{right:50%}
+.strip .st.now:first-child:after{display:none}
+.strip .st i{position:absolute;top:0;left:50%;margin-left:-5px;width:10px;height:10px;border-radius:50%;background:#fff;border:2px solid var(--control);z-index:1}
+.strip .st.done i,.strip .st.now i{background:var(--ink);border-color:var(--ink)}
+.strip .st.rs i{border-color:var(--resale)}
+.strip .st.rs.done i,.strip .st.rs.now i{background:var(--resale);border-color:var(--resale)}
+.strip b{display:block;font-size:12px;font-weight:600}
+.strip span{display:block;font-size:12px;color:var(--sub)}
+
+/* 자리 표기: 구역, 열, 번 */
+.seat{display:flex;border:1px solid var(--line);border-radius:var(--r-card);margin-top:12px}
+.seat div{flex:none;min-width:76px;padding:10px 14px;border-left:1px solid var(--line)}
+.seat div:first-child{border-left:0;flex:1;min-width:0}
+.seat small{display:block;font-size:12px;color:var(--sub);white-space:nowrap}
+.seat b{display:block;font-size:17px;font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.seat div:first-child b{white-space:normal}
+
+/* 목록 줄 */
+.list{border-top:1px solid var(--line)}
+.li{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 20px;border-bottom:1px solid var(--rule)}
+.li .d{flex:none;width:58px}
+.li .d b{display:block;font-size:17px;font-weight:700}
+.li .d span{font-size:12px;color:var(--sub)}
+.li .m{flex:1;min-width:0}
+.li .m b{display:block;font-size:15px;font-weight:600}
+.li .m span{display:block;font-size:13px;color:var(--sub)}
+.li .v{flex:none;text-align:right}
+.li .v b{display:block;font-size:15px;font-weight:700}
+.li .v span{display:block;font-size:12px;color:var(--sub)}
+.li .go{flex:none;color:var(--off);font-size:17px;line-height:1}
+.li[disabled]{cursor:default}
+.li.off .d b,.li.off .m b{color:var(--off)}
+
+/* 버튼 */
+.cta{flex:none;padding:10px 16px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:#fff}
+.btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:52px;border-radius:var(--r-card);font-size:17px;font-weight:600;background:var(--ink);color:#fff;padding:0 16px;text-align:center}
+.btn.ghost{background:#fff;color:var(--ink);border:1px solid var(--control)}
+.btn.text{background:none;color:var(--sub);min-height:44px;font-weight:500;font-size:15px}
+.btn + .btn{margin-top:8px}
+.armed{display:flex;align-items:center;gap:6px;justify-content:center;font-size:13px;margin-bottom:8px}
+.armed svg{width:16px;height:16px}
+
+/* 아래 탭 */
+.tabs{flex:none;display:flex;border-top:1px solid var(--line);background:#fff;padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:11px;color:var(--sub)}
+.tabs button[aria-current="page"]{color:var(--ink);font-weight:600}
+.tabs svg{width:22px;height:22px}
+
+/* 알림, 토스트, 시트 */
+.push{position:absolute;left:10px;right:10px;top:8px;z-index:6;display:flex;gap:10px;align-items:flex-start;width:auto;padding:12px 14px;border-radius:12px;background:#1d1d1f;color:#fff;font-size:15px;box-shadow:0 6px 20px rgba(0,0,0,.18)} /* taste-skill-ignore: 화면 위에 뜨는 알림 */
+.push svg{flex:none;width:18px;height:18px;margin-top:2px}
+.push b{display:block;font-weight:600}
+.push span{display:block;color:#d2d2d2;font-size:13px}
+.toast{position:absolute;left:16px;right:16px;bottom:84px;z-index:5;padding:12px 14px;border-radius:var(--r-card);background:#1d1d1f;color:#fff;font-size:15px;text-align:center}
+.dim{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:7}
+.sheet{position:absolute;left:0;right:0;bottom:0;z-index:8;max-height:92%;overflow-y:auto;background:#fff;border-radius:16px 16px 0 0;padding:22px 20px calc(16px + env(safe-area-inset-bottom));animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--rule);font-size:15px}
+.kv span{color:var(--sub)}
+.kv b{font-weight:600;text-align:right}
+.kv b.money{font-size:20px;font-weight:700}
+.kv:last-of-type{border-bottom:0}
+.tier{margin-top:6px}
+.tier td{padding:9px 0;font-size:15px}
+.tier tr.past td{color:var(--off)}
+.tier tr.cur td{font-weight:700}
+.tier .chip{margin-left:6px;background:var(--ink);color:#fff}
+
+/* 티켓 */
+.tk{margin:4px 20px 0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.tk .top{padding:16px}
+.tk .qr{border-top:1px solid var(--line);padding:18px 16px;display:flex;flex-direction:column;align-items:center;gap:10px;text-align:center;font-size:13px;color:var(--sub)}
+.tk .qr svg{width:148px;height:148px}
+.tk .qr .wait{width:148px;height:148px;border-radius:var(--r-card);background:var(--band);display:flex;align-items:center;justify-content:center;padding:14px;font-size:13px}
+.total{padding:18px 20px 6px}
+.total small{display:block;font-size:13px;color:var(--sub)}
+.total b{display:block;font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+.total span{display:block;font-size:13px;color:var(--sub);margin-top:4px}
+.empty{margin:16px 20px;padding:18px 16px;border:1px dashed var(--control);border-radius:var(--r-card);font-size:15px;color:var(--sub);text-align:center}
+
+/* 휴대폰에서는 틀 없이 화면을 꽉 채운다 */
+@media (max-width:600px), (max-height:520px) and (orientation:landscape){
+  body{background:#fff}
+  .stage{padding:0;gap:0;display:block}
+  .unit{display:block}
+  .unit h2,.sbar{display:none}
+  .device{width:100%;height:calc(100dvh - var(--pbar-h,53px));border:0;border-radius:0}
+  .pbar{padding:calc(8px + env(safe-area-inset-top)) 12px 8px;gap:6px 10px;font-size:12px}
+  .pbar .lbl{display:none}
+  .pbar .seg button,.pbar .go,.pbar .re{height:40px}
+}
+@media (prefers-reduced-motion:reduce){.sheet{animation:none}}
+</style>
+</head>
+<body>
+<div id="pbar" class="pbar"></div>
+<div id="stage" class="stage"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ==================================================================
+   1. 규칙. 서비스 규칙의 숫자는 여기서만 바꾼다.
+================================================================== */
+const RULES = {
+  releaseDeadlineDays: 4,     // 경기 며칠 전까지 자리를 내놓을 수 있나 (그날 밤 11:59)
+  resaleOpenDays: 3,          // 경기 며칠 전에 공식 재판매를 여나
+  resaleOpenTime: '10:00',
+  paybackTiers: [             // 일찍 내놓을수록 더 많이 돌려받는다. 위에서부터 먼저 맞는 구간을 쓴다
+    { minDays: 14, rate: 0.50 },
+    { minDays: 7,  rate: 0.35 },
+    { minDays: 4,  rate: 0.20 }
+  ],
+  paybackPaidDaysAfter: 2,    // 경기 며칠 뒤에 페이백을 지급하나 (팔리지 않아도 지급)
+  bookingFee: 1000,           // 예매 수수료 (장당, 원)
+  maxSeatsPerBuyer: 2
+};
+
+/* ==================================================================
+   2. 데이터. 모두 가상의 예시다. 2026년 6월 1일은 월요일.
+================================================================== */
+const HOME = { ko:'한강 헤론즈', koS:'헤론즈', en:'Hangang Herons', enS:'Herons', color:'#0f5c5a', parkKo:'리버사이드 파크', parkEn:'Riverside Park' };
+const TEAMS = {
+  whales:  { ko:'동해 웨일즈', koS:'웨일즈', en:'Donghae Whales', enS:'Whales', color:'#1f3a8a' },
+  falcons: { ko:'북악 팔콘스', koS:'팔콘스', en:'Bugak Falcons', enS:'Falcons', color:'#8a1f2b' }
+};
+const GAMES = [
+  { day:12, opp:'whales',  time:'18:30' }, { day:13, opp:'whales',  time:'18:00' }, { day:14, opp:'whales',  time:'14:00' },
+  { day:16, opp:'falcons', time:'18:30' }, { day:17, opp:'falcons', time:'18:30' }, { day:18, opp:'falcons', time:'18:30' }
+];
+const FOCUS = 13;                                   // 이야기의 중심이 되는 경기 (6월 13일 토요일, 매진)
+const STORY = [ { day:5, time:'20:40' }, { day:10, time:'10:00' }, { day:13, time:'15:00' } ];  // 오늘, 재판매 오픈, 경기 당일
+const MY_SEAT = { section:'cheer', block:'112', row:'F', no:'14' };   // 시즌권 보유자의 자리
+const SECTIONS = [                                  // released: 다른 시즌권 회원들이 내놓은 자리 수, seat: 자동 배정 예시
+  { id:'cheer', ko:'응원석',     en:'Cheering section',  price:24000, released:35, seat:{ block:'112', row:'B', no:'11' } },
+  { id:'first', ko:'1루 내야석', en:'Infield, 1st base', price:22000, released:41, seat:{ block:'104', row:'C', no:'7'  } },
+  { id:'third', ko:'3루 내야석', en:'Infield, 3rd base', price:22000, released:38, seat:{ block:'117', row:'D', no:'9'  } },
+  { id:'out',   ko:'외야석',     en:'Outfield',          price:13000, released:33, seat:{ block:'207', row:'J', no:'2'  } }
+];
+const PRIOR = [                                     // 이번 시즌에 이미 내놓았던 경기 (지급 완료)
+  { m:5, d:16, opp:'falcons', rate:0.20 }, { m:4, d:25, opp:'whales', rate:0.35 }, { m:4, d:11, opp:'falcons', rate:0.50 }
+];
+
+/* ==================================================================
+   3. 문구. 한국어와 영어. 화면의 글은 여기서만 바꾼다.
+================================================================== */
+const WD = { ko:['일','월','화','수','목','금','토'], en:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] };
+const MON = ['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const T = {
+ko:{
+  pLabel:'프로토타입 조작', buyer:'구매자', holder:'시즌권 보유자', both:'함께 보기', reset:'처음으로',
+  nowIs:'지금', next:['재판매 오픈 날로','경기 당일로','끝'],
+  gameInfo:'경기 정보', soldOut:'매진', booking:'일반 예매',
+  rsTitle:'공식 재판매', rsOpens:(d,t)=>`${d} ${t}에 열려요`, rsOpenNow:'지금 열려 있어요', rsClosed:'재판매가 끝났어요',
+  rsWhat:'시즌권 회원이 못 오는 날 구단에 내놓은 자리예요. 가격은 정가 그대로예요.',
+  sToday:'오늘', sDeadline:'내놓기 마감', sOpen:'재판매 오픈', sGame:'경기', sPay:'페이백 지급', sReleased:'내놓음',
+  thSection:'구역', thSoFar:'지금까지 나온 자리', thLeft:'남은 자리', thPrice:'정가', sumRow:'합계',
+  seats:n=>`${n}석`, left:n=>`${n}석 남음`, home:'홈', away:'원정', more:d=>`자리는 ${d} 밤까지 더 나올 수 있어요. 한 사람이 ${RULES.maxSeatsPerBuyer}매까지 살 수 있어요.`,
+  alertOn:'열리면 알림 받기', alertOff:'알림 끄기', armed:(d,t)=>`${d} ${t}에 알려 드려요`, alertDone:(d,t)=>`알림을 신청했어요. ${d} ${t}에 알려 드릴게요.`, alertCancel:'알림을 껐어요.',
+  seeSeats:'재판매 좌석 보기', pushOpenT:'공식 재판매가 열렸어요', pushOpenB:g=>`${g} 좌석을 정가로 살 수 있어요.`,
+  rsSeats:'공식 재판매 좌석', pick:'구역을 고르면 자리를 배정해 드려요.', feeNote:f=>`모든 좌석은 정가예요. 예매 수수료는 장당 ${f}이에요.`,
+  noSeat:'남은 자리가 없어요', assigned:'배정된 자리', block:'구역', row:'열', no:'번', blockOf:(s,b)=>`${s} ${b}블록`,
+  ticketPrice:'티켓 금액 (정가)', fee:'예매 수수료', total:'총 결제 금액', pay:a=>`${a} 결제하기`, otherSec:'다른 구역 보기',
+  paid:'예매가 끝났어요. 내 티켓에서 볼 수 있어요.',
+  tabGame:'경기', tabTicket:'내 티켓', myTicket:'내 티켓', noTicket:'아직 예매한 티켓이 없어요.',
+  fromHolder:'시즌권 회원이 못 오는 날 내놓은 자리예요. 예매한 본인만 입장할 수 있어요.',
+  qrWait:'경기 3시간 전부터 입장 QR이 보여요.', qrNow:'입구에서 이 QR을 보여 주세요.',
+  tabSeason:'시즌권', tabPayback:'페이백', mySeason:'내 시즌권', mySeat:'한강 헤론즈 2026 시즌권', upcoming:'다가오는 홈경기',
+  hint:'못 가는 경기가 있으면 경기를 눌러 자리를 내놓으세요. 정가의 일부를 돌려받아요.',
+  going:'관람 예정', released:'내놓음', closed:'내놓기 마감', sold:'판매 완료',
+  askTitle:d=>`${d} 경기에 못 가시나요?`, askBody:'자리를 내놓으면 구단이 정가로 다시 판매해요. 팔리지 않아도 페이백은 받아요.',
+  payNow:'지금 내놓으면 돌려받는 금액', ofPrice:r=>`정가의 ${r}`, deadline:'내놓을 수 있는 기한', night:'밤 11:59',
+  undo:'내놓기 취소', undoUntil:'기한 전까지 언제든 가능', tierTitle:'일찍 내놓을수록 더 많이 돌려받아요', until:d=>`${d}까지`, now:'지금',
+  release:'이 경기 자리 내놓기', keep:'그대로 관람하기', close:'닫기',
+  releasedToast:'자리를 내놓았어요.', undoToast:'내놓기를 취소했어요.',
+  statusTitle:d=>`${d} 경기 자리를 내놓았어요`, payFixed:'돌려받는 금액', payOn:d=>`${d}에 입금`,
+  lockedNote:'기한이 지나 취소할 수 없어요.', closedTitle:d=>`${d} 경기는 내놓기가 마감됐어요`, closedBody:d=>`기한은 ${d} 밤 11:59였어요.`,
+  pushSoldT:'내놓은 자리가 판매됐어요', pushSoldB:(g,a,d)=>`${g}. 페이백 ${a}은 ${d}에 입금돼요.`,
+  payback:'페이백', seasonTotal:'이번 시즌 돌려받는 금액', paidPart:(a,b)=>`지급 완료 ${a}, 지급 예정 ${b}`,
+  due:d=>`${d} 지급 예정`, donePaid:'지급 완료', payRule:n=>`페이백은 자리가 팔리지 않아도 받아요. 경기 ${n}일 뒤에 입금돼요.`,
+  soldTo:'다른 팬이 이 자리에서 관람해요', vs:'vs'
+},
+en:{
+  pLabel:'Prototype controls', buyer:'Buyer', holder:'Season ticket holder', both:'Both', reset:'Start over',
+  nowIs:'Now', next:['To resale opening day','To game day','End'],
+  gameInfo:'Game', soldOut:'Sold out', booking:'Regular booking',
+  rsTitle:'Official resale', rsOpens:(d,t)=>`Opens ${d}, ${t}`, rsOpenNow:'Open now', rsClosed:'Resale has ended',
+  rsWhat:'Seats that season ticket holders gave back to the club for a game they will miss. Sold at face value.',
+  sToday:'Today', sDeadline:'Release deadline', sOpen:'Resale opens', sGame:'Game', sPay:'Payback paid', sReleased:'Released',
+  thSection:'Section', thSoFar:'Seats released so far', thLeft:'Seats left', thPrice:'Face value', sumRow:'Total',
+  seats:n=>`${n}`, left:n=>`${n} left`, home:'Home', away:'Away', more:d=>`More seats may be released until the night of ${d}. Up to ${RULES.maxSeatsPerBuyer} per person.`,
+  alertOn:'Notify me when it opens', alertOff:'Turn off alert', armed:(d,t)=>`We will notify you on ${d} at ${t}`, alertDone:(d,t)=>`Alert set. We will notify you on ${d} at ${t}.`, alertCancel:'Alert turned off.',
+  seeSeats:'See resale seats', pushOpenT:'Official resale is open', pushOpenB:g=>`${g}: seats at face value.`,
+  rsSeats:'Official resale seats', pick:'Choose a section and we will assign a seat.', feeNote:f=>`All seats are face value. Booking fee is ${f} per ticket.`,
+  noSeat:'No seats left', assigned:'Your seat', block:'Section', row:'Row', no:'Seat', blockOf:(s,b)=>`${s} ${b}`,
+  ticketPrice:'Ticket (face value)', fee:'Booking fee', total:'Total', pay:a=>`Pay ${a}`, otherSec:'Choose another section',
+  paid:'Booked. Find it in My tickets.',
+  tabGame:'Game', tabTicket:'My tickets', myTicket:'My tickets', noTicket:'You have no tickets yet.',
+  fromHolder:'This seat was released by a season ticket holder. Only the person who booked can enter.',
+  qrWait:'Your entry QR appears 3 hours before the game.', qrNow:'Show this QR at the gate.',
+  tabSeason:'Season ticket', tabPayback:'Payback', mySeason:'My season ticket', mySeat:'Hangang Herons, 2026 season ticket', upcoming:'Upcoming home games',
+  hint:'Cannot make a game? Tap it to release your seat and get part of the face value back.',
+  going:'Attending', released:'Released', closed:'Closed', sold:'Sold',
+  askTitle:d=>`Cannot make the ${d} game?`, askBody:'If you release your seat, the club resells it at face value. You get the payback even if it does not sell.',
+  payNow:'Payback if you release now', ofPrice:r=>`${r} of face value`, deadline:'Release deadline', night:'11:59 PM',
+  undo:'Cancel release', undoUntil:'Any time before the deadline', tierTitle:'The earlier you release, the more you get back', until:d=>`By ${d}`, now:'Now',
+  release:'Release my seat for this game', keep:'Keep my seat', close:'Close',
+  releasedToast:'Seat released.', undoToast:'Release cancelled.',
+  statusTitle:d=>`You released your seat for ${d}`, payFixed:'Payback', payOn:d=>`Paid on ${d}`,
+  lockedNote:'The deadline has passed, so this cannot be cancelled.', closedTitle:d=>`Release is closed for ${d}`, closedBody:d=>`The deadline was ${d}, 11:59 PM.`,
+  pushSoldT:'Your released seat was sold', pushSoldB:(g,a,d)=>`${g}. Payback ${a} will be paid on ${d}.`,
+  payback:'Payback', seasonTotal:'Payback this season', paidPart:(a,b)=>`Paid ${a}, scheduled ${b}`,
+  due:d=>`Due ${d}`, donePaid:'Paid', payRule:n=>`You get the payback even if the seat does not sell. It is paid ${n} days after the game.`,
+  soldTo:'Another fan will watch from this seat', vs:'vs'
+}};
+
+/* ==================================================================
+   4. 상태와 계산
+================================================================== */
+const Q = new URLSearchParams(location.search);
+const S = {
+  lang: Q.get('lang') === 'en' ? 'en' : 'ko',
+  mode: ['buyer','holder','both'].includes(Q.get('role')) ? Q.get('role') : (matchMedia('(max-width:600px), (max-height:520px) and (orientation:landscape)').matches ? 'buyer' : 'both'),
+  test: Q.get('test') === '1',
+  step: 0, autoSold: false,
+  holder: { tab:'season', sheet:null, released:{}, push:false, toast:'' },
+  buyer:  { screen:'game', alert:false, sheet:null, ticket:null, push:false, toast:'' }
+};
+const isNarrow = () => matchMedia('(max-width:600px), (max-height:520px) and (orientation:landscape)').matches;
+const L = () => T[S.lang];
+const today = () => STORY[S.step].day;
+const md = d => d >= 1 ? { m:6, d } : { m:5, d:31 + d };                 // 6월 기준 날짜 번호를 월·일로
+const wdOf = (m, d) => new Date(2026, m - 1, d).getDay();
+const wdi = d => { const x = md(d); return wdOf(x.m, x.d); };
+function fDate(d, long){ const x = md(d), w = WD[S.lang][wdi(d)];
+  return S.lang === 'ko' ? (long ? `${x.m}월 ${x.d}일 (${w})` : `${x.m}.${x.d} (${w})`) : `${w}, ${MON[x.m]} ${x.d}`; }
+function fMD(m, d){ return S.lang === 'ko' ? `${m}.${d}` : `${MON[m]} ${d}`; }
+function fTime(t){ const [h, mi] = t.split(':').map(Number);
+  if (S.lang === 'en') return `${((h + 11) % 12) + 1}:${String(mi).padStart(2,'0')} ${h < 12 ? 'AM' : 'PM'}`;
+  return `${h < 12 ? '오전' : '오후'} ${((h + 11) % 12) + 1}시${mi ? ` ${mi}분` : ''}`; }
+const clock = t => { const [h, mi] = t.split(':').map(Number); return `${((h + 11) % 12) + 1}:${String(mi).padStart(2,'0')}`; };
+const won = n => S.lang === 'ko' ? `${n.toLocaleString('en-US')}원` : `₩${n.toLocaleString('en-US')}`;
+const pct = r => `${Math.round(r * 100)}%`;
+const game = d => GAMES.find(g => g.day === d);
+const opp = g => TEAMS[g.opp][S.lang === 'ko' ? 'koS' : 'enS'];
+const matchup = g => `${HOME[S.lang === 'ko' ? 'koS' : 'enS']} ${L().vs} ${opp(g)}`;
+const park = () => S.lang === 'ko' ? HOME.parkKo : HOME.parkEn;
+const secName = s => S.lang === 'ko' ? s.ko : s.en;
+const cheer = SECTIONS[0];
+
+const deadlineDay = d => d - RULES.releaseDeadlineDays;
+const openDay = d => d - RULES.resaleOpenDays;
+const payDay = d => d + RULES.paybackPaidDaysAfter;
+const canRelease = d => d - today() >= RULES.releaseDeadlineDays;
+function rateFor(daysBefore){ const t = RULES.paybackTiers.find(x => daysBefore >= x.minDays); return t ? t.rate : 0; }
+const paybackFor = (d, onDay) => Math.round(cheer.price * rateFor(d - onDay));
+const isReleased = d => !!S.holder.released[d];
+const resaleOpen = () => today() >= openDay(FOCUS) && today() < FOCUS;
+const resaleOver = () => today() >= FOCUS;
+const releasedCount = s => s.released + (s.id === 'cheer' && isReleased(FOCUS) ? 1 : 0);
+const boughtIn = s => S.buyer.ticket && S.buyer.ticket.sec === s.id ? 1 : 0;
+const seatFor = s => (s.id === 'cheer' && isReleased(FOCUS)) ? MY_SEAT : s.seat;
+const mySeatSold = () => isReleased(FOCUS) && (S.autoSold || (S.buyer.ticket && S.buyer.ticket.mine));
+
+function doRelease(d){ S.holder.released[d] = { on: today(), rate: rateFor(d - today()), amt: paybackFor(d, today()) }; }
+function applyMode(){ if (S.mode === 'buyer' && !isReleased(FOCUS)) S.holder.released[FOCUS] = { on: STORY[0].day, rate: rateFor(FOCUS - STORY[0].day), amt: paybackFor(FOCUS, STORY[0].day) }; }
+function fresh(){ S.step = 0; S.autoSold = false;
+  S.holder = { tab:'season', sheet:null, released:{}, push:false, toast:'' };
+  S.buyer  = { screen:'game', alert:false, sheet:null, ticket:null, push:false, toast:'' }; applyMode(); }
+
+/* 시즌 페이백 줄: 이전 경기(PRIOR)와 이번에 내놓은 경기를 합친다. 합계는 이 줄들에서 계산한다 */
+function paybackRows(){
+  const mine = Object.keys(S.holder.released).map(Number).sort((a,b) => b - a).map(d => {
+    const r = S.holder.released[d], g = game(d);
+    return { m: 6, d, opp: opp(g), rate: r.rate, amt: r.amt, paid: today() >= payDay(d), due: fMD(6, payDay(d)), sold: d === FOCUS && mySeatSold() };
+  });
+  const before = PRIOR.map(p => ({ m: p.m, d: p.d, opp: TEAMS[p.opp][S.lang === 'ko' ? 'koS' : 'enS'], rate: p.rate, amt: Math.round(cheer.price * p.rate), paid: true }));
+  return mine.concat(before);
+}
+
+/* ==================================================================
+   5. 화면. 구매자 3개(b1, b2, b3), 시즌권 보유자 2개(h1, h2)
+================================================================== */
+const IC = {
+  back:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>',
+  bell:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 1 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg>',
+  game:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>',
+  ticket:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16v3.2a1.8 1.8 0 0 0 0 3.6V17H4v-3.2a1.8 1.8 0 0 0 0-3.6z"/><path d="M14 7v10" stroke-dasharray="2 2.4"/></svg>',
+  seat:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 12V6a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v6"/><path d="M5 11v5h14v-5M7 16v4M17 16v4"/></svg>',
+  coin:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 9l1.6 6 1.9-5 1.9 5 1.6-6M8 12h8"/></svg>'
+};
+function teams(g){ const k = S.lang === 'ko' ? 'ko' : 'en', o = TEAMS[g.opp];
+  return `<div class="teams"><div><i style="background:${HOME.color}"></i><b>${HOME[k]}</b><span>${L().home}</span></div><div><i style="background:${o.color}"></i><b>${o[k]}</b><span>${L().away}</span></div></div>`; }
+const seatBox = (secLabel, s) => `<div class="seat"><div><small>${L().block}</small><b>${L().blockOf(secLabel, s.block)}</b></div><div><small>${L().row}</small><b>${s.row}</b></div><div><small>${L().no}</small><b class="num">${s.no}</b></div></div>`;
+function strip(nodes){ return `<div class="strip">${nodes.map(n => `<div class="st ${n.state || ''} ${n.rs ? 'rs' : ''}"><i></i><b>${n.label}</b><span class="num">${n.sub}</span></div>`).join('')}</div>`; }
+const stateOf = d => today() > d ? 'done' : today() === d ? 'now' : '';
+function push(title, body, act){ return `<button class="push" data-act="${act}">${IC.bell}<span><b>${title}</b><span>${body}</span></span></button>`; }
+const toast = msg => msg ? `<div class="toast" role="status">${msg}</div>` : '';
+function tabs(items, on){ return `<nav class="tabs">${items.map(([k, label, ic, act]) => `<button data-act="${act}" data-arg="${k}" ${k === on ? 'aria-current="page"' : ''}>${IC[ic]}${label}</button>`).join('')}</nav>`; }
+function qr(seed){ let x = seed, c = ''; const N = 25, rnd = () => { x = (x * 1103515245 + 12345) & 0x7fffffff; return x / 0x7fffffff; };
+  const fx = (r, k) => (r < 7 && k < 7) || (r < 7 && k >= N - 7) || (r >= N - 7 && k < 7);
+  for (let r = 0; r < N; r++) for (let k = 0; k < N; k++) { if (!fx(r, k) && rnd() > .52) c += `<rect x="${k}" y="${r}" width="1" height="1"/>`; }
+  const f = (a, b) => `<rect x="${a}" y="${b}" width="7" height="7"/><rect x="${a+1}" y="${b+1}" width="5" height="5" fill="#fff"/><rect x="${a+2}" y="${b+2}" width="3" height="3"/>`;
+  return `<svg viewBox="-1 -1 27 27" fill="#111" role="img" aria-label="QR"><rect x="-1" y="-1" width="27" height="27" fill="#fff"/>${c}${f(0,0)}${f(N-7,0)}${f(0,N-7)}</svg>`; }
+
+/* ---- b1. 구매자: 매진된 경기 ---- */
+function b1(){
+  const t = L(), g = game(FOCUS), B = S.buyer, open = resaleOpen(), over = resaleOver();
+  const dleft = FOCUS - today();
+  const rows = SECTIONS.map(s => { const n = open ? releasedCount(s) - boughtIn(s) : releasedCount(s);
+    return { name: secName(s), n, price: s.price }; });
+  const sum = rows.reduce((a, r) => a + r.n, 0);
+  const head = over ? t.rsClosed : open ? t.rsOpenNow : t.rsOpens(fDate(openDay(FOCUS), true), fTime(RULES.resaleOpenTime));
+  const nodes = [
+    { label: t.sToday, sub: fMD(md(today()).m, md(today()).d), state: 'now' },
+    { label: t.sOpen, sub: fMD(6, openDay(FOCUS)), state: today() >= openDay(FOCUS) ? 'done' : '', rs: true },
+    { label: t.sGame, sub: fMD(6, FOCUS), state: today() >= FOCUS ? 'done' : '' }
+  ];
+  if (today() >= openDay(FOCUS)) nodes.shift();
+  const cta = over ? '' : open
+    ? `<div class="cta"><button class="btn" data-act="b-go" data-arg="resale">${t.seeSeats}</button></div>`
+    : `<div class="cta">${B.alert ? `<div class="armed">${IC.bell}<span>${t.armed(fDate(openDay(FOCUS), true), fTime(RULES.resaleOpenTime))}</span></div>` : ''}<button class="btn ${B.alert ? 'ghost' : ''}" data-act="b-alert">${B.alert ? t.alertOff : t.alertOn}</button></div>`;
+  return `<div class="nav"><span class="back" aria-hidden="true">${IC.back}</span><h1>${t.gameInfo}</h1></div>
+  <div class="body">
+    <div class="pad">
+      <div class="row2">${teams(g)}${dleft > 0 ? `<span class="chip num">D-${dleft}</span>` : ''}</div>
+      <div class="when" style="margin-top:10px">${fDate(FOCUS, true)} ${fTime(g.time)}, ${park()}</div>
+      <div class="state"><span>${t.booking}</span><b>${t.soldOut}</b></div>
+    </div>
+    <div class="band"></div>
+    <div class="pad">
+      <div class="row2"><div class="h">${t.rsTitle}</div></div>
+      <div class="p"><span class="hue">${head}</span></div>
+      <div class="note" style="margin-top:6px">${t.rsWhat}</div>
+      ${over ? '' : strip(nodes)}
+      <table class="num"><thead><tr><th>${t.thSection}</th><th class="r">${open ? t.thLeft : t.thSoFar}</th><th class="r">${t.thPrice}</th></tr></thead><tbody>
+        ${rows.map(r => `<tr><td>${r.name}</td><td class="r">${t.seats(r.n)}</td><td class="r">${won(r.price)}</td></tr>`).join('')}
+        <tr class="sum"><td>${t.sumRow}</td><td class="r">${t.seats(sum)}</td><td></td></tr></tbody></table>
+      ${open || over ? '' : `<div class="note">${t.more(fDate(deadlineDay(FOCUS)))}</div>`}
+    </div>
+  </div>${cta}`;
+}
+
+/* ---- b2. 구매자: 공식 재판매 좌석 (결제는 아래 시트) ---- */
+function b2(){
+  const t = L(), g = game(FOCUS), B = S.buyer;
+  const list = SECTIONS.map(s => { const n = releasedCount(s) - boughtIn(s);
+    return `<button class="li ${n ? '' : 'off'}" data-act="b-sec" data-arg="${s.id}" ${n ? '' : 'disabled'}>
+      <span class="m"><b>${secName(s)}</b><span class="num">${n ? t.left(n) : t.noSeat}</span></span>
+      <span class="v"><b class="num">${won(s.price)}</b><span>${t.thPrice}</span></span><span class="go" aria-hidden="true">›</span></button>`; }).join('');
+  let sheet = '';
+  if (B.sheet){ const s = SECTIONS.find(x => x.id === B.sheet), seat = seatFor(s), tot = s.price + RULES.bookingFee;
+    sheet = `<div class="dim" data-act="b-close"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="${t.assigned}">
+      <div class="h">${t.assigned}</div>${seatBox(secName(s), seat)}
+      <div style="margin-top:10px"><div class="kv"><span>${t.ticketPrice}</span><b class="num">${won(s.price)}</b></div>
+      <div class="kv"><span>${t.fee}</span><b class="num">${won(RULES.bookingFee)}</b></div>
+      <div class="kv"><span>${t.total}</span><b class="money num">${won(tot)}</b></div></div>
+      <div style="margin-top:12px"><button class="btn" data-act="b-pay">${t.pay(won(tot))}</button><button class="btn text" data-act="b-close">${t.otherSec}</button></div></div>`; }
+  return `<div class="nav"><button class="back" data-act="b-go" data-arg="game" aria-label="${t.gameInfo}">${IC.back}</button><h1>${t.rsSeats}</h1></div>
+  <div class="body">
+    <div class="pad"><div class="match" style="font-size:17px">${matchup(g)}</div><div class="when">${fDate(FOCUS, true)} ${fTime(g.time)}</div><div class="note">${t.pick}</div></div>
+    <div class="list">${list}</div>
+    <div class="pad"><div class="note" style="margin-top:0">${t.feeNote(won(RULES.bookingFee))}</div></div>
+  </div>${tabs([['game', t.tabGame, 'game', 'b-tab'], ['ticket', t.tabTicket, 'ticket', 'b-tab']], 'game')}${sheet}`;
+}
+
+/* ---- b3. 구매자: 내 티켓 ---- */
+function b3(){
+  const t = L(), g = game(FOCUS), k = S.buyer.ticket;
+  const body = !k ? `<div class="empty">${t.noTicket}</div>` : (() => { const s = SECTIONS.find(x => x.id === k.sec);
+    return `<div class="tk"><div class="top"><span class="chip rs">${t.rsTitle}</span>
+      <div style="margin-top:12px">${teams(g)}</div><div class="when" style="margin-top:10px">${fDate(FOCUS, true)} ${fTime(g.time)}, ${park()}</div>
+      ${seatBox(secName(s), k.seat)}</div>
+      <div class="qr">${today() >= FOCUS ? qr(112014) + `<span>${t.qrNow}</span>` : `<div class="wait">${t.qrWait}</div>`}</div></div>
+      <div class="pad"><div class="note" style="margin-top:0">${t.fromHolder}</div></div>`; })();
+  return `<h1 class="big">${t.myTicket}</h1><div class="body">${body}</div>${tabs([['game', t.tabGame, 'game', 'b-tab'], ['ticket', t.tabTicket, 'ticket', 'b-tab']], 'ticket')}`;
+}
+
+/* ---- h1. 시즌권 보유자: 내 시즌권 (자리 내놓기는 아래 시트) ---- */
+function h1(){
+  const t = L(), H = S.holder;
+  const list = GAMES.filter(g => g.day >= today()).map(g => { const rel = H.released[g.day], open = canRelease(g.day);
+    const chip = rel ? (g.day === FOCUS && mySeatSold() ? `<span class="chip ok">${t.sold}</span>` : `<span class="chip rs">${t.released}</span>`) : open ? '' : `<span class="chip">${t.closed}</span>`;
+    return `<button class="li" data-act="h-open" data-arg="${g.day}"><span class="d"><b class="num">${fMD(6, g.day)}</b><span>${WD[S.lang][wdi(g.day)]}</span></span>
+      <span class="m"><b>${t.vs} ${opp(g)}</b><span class="num">${fTime(g.time)}${rel ? `, ${t.payback} ${won(rel.amt)}` : ''}</span></span>${chip}<span class="go" aria-hidden="true">›</span></button>`; }).join('');
+  let sheet = '';
+  if (H.sheet){ const d = H.sheet, g = game(d), rel = H.released[d], open = canRelease(d);
+    if (rel){
+      const nodes = [ { label: t.sReleased, sub: fMD(6, rel.on), state: 'done' }, { label: t.sDeadline, sub: fMD(6, deadlineDay(d)), state: today() > deadlineDay(d) ? 'done' : '' },
+        { label: t.sOpen, sub: fMD(6, openDay(d)), state: today() >= openDay(d) ? 'done' : '', rs: true }, { label: t.sPay, sub: fMD(6, payDay(d)), state: today() >= payDay(d) ? 'done' : '' } ];
+      sheet = `<div class="dim" data-act="h-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="h">${t.statusTitle(fDate(d, true))}</div>
+        ${seatBox(secName(cheer), MY_SEAT)}${strip(nodes)}
+        <div style="margin-top:14px"><div class="kv"><span>${t.payFixed}</span><b class="money num">${won(rel.amt)}</b></div>
+        <div class="kv"><span>${t.ofPrice(pct(rel.rate))}</span><b>${t.payOn(fDate(payDay(d)))}</b></div></div>
+        ${d === FOCUS && mySeatSold() ? `<div class="note">${t.soldTo}</div>` : ''}
+        <div style="margin-top:12px">${open ? `<button class="btn ghost" data-act="h-undo" data-arg="${d}">${t.undo}</button>` : `<div class="note" style="margin:0 0 8px">${t.lockedNote}</div>`}
+        <button class="btn text" data-act="h-close">${t.close}</button></div></div>`;
+    } else if (open){
+      const nowDays = d - today(), rate = rateFor(nowDays), amt = paybackFor(d, today());
+      const tiers = RULES.paybackTiers.map(x => { const last = d - x.minDays, cur = x.rate === rate, past = today() > last;
+        return `<tr class="${cur ? 'cur' : past ? 'past' : ''}"><td>${t.until(fDate(last))}${cur ? `<span class="chip">${t.now}</span>` : ''}</td><td class="r">${pct(x.rate)}</td><td class="r">${won(Math.round(cheer.price * x.rate))}</td></tr>`; }).join('');
+      sheet = `<div class="dim" data-act="h-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="h">${t.askTitle(fDate(d, true))}</div>
+        <div class="note" style="margin-top:6px">${t.askBody}</div>
+        <div style="margin-top:8px"><div class="kv"><span>${t.payNow}</span><b class="money num">${won(amt)}</b></div>
+        <div class="kv"><span>${t.deadline}</span><b>${fDate(deadlineDay(d), true)} ${t.night}</b></div>
+        <div class="kv"><span>${t.undo}</span><b>${t.undoUntil}</b></div></div>
+        <div class="note" style="margin-top:14px;color:var(--ink);font-weight:600">${t.tierTitle}</div>
+        <table class="tier num"><tbody>${tiers}</tbody></table>
+        <div style="margin-top:12px"><button class="btn" data-act="h-release" data-arg="${d}">${t.release}</button><button class="btn text" data-act="h-close">${t.keep}</button></div></div>`;
+    } else {
+      sheet = `<div class="dim" data-act="h-close"></div><div class="sheet" role="dialog" aria-modal="true"><div class="h">${t.closedTitle(fDate(d, true))}</div>
+        <div class="note" style="margin-top:6px">${t.closedBody(fDate(deadlineDay(d), true))}</div>
+        <div style="margin-top:12px"><button class="btn text" data-act="h-close">${t.close}</button></div></div>`;
+    } }
+  return `<h1 class="big">${t.mySeason}</h1>
+  <div class="body">
+    <div class="pad" style="padding-top:6px"><div class="note" style="margin-top:0">${t.mySeat}</div>${seatBox(secName(cheer), MY_SEAT)}</div>
+    <div class="band"></div>
+    <div class="pad" style="padding-bottom:10px"><div class="h">${t.upcoming}</div><div class="note" style="margin-top:6px">${t.hint}</div></div>
+    <div class="list">${list}</div>
+  </div>${tabs([['season', t.tabSeason, 'seat', 'h-tab'], ['payback', t.tabPayback, 'coin', 'h-tab']], 'season')}${sheet}`;
+}
+
+/* ---- h2. 시즌권 보유자: 페이백 ---- */
+function h2(){
+  const t = L(), rows = paybackRows();
+  const paid = rows.filter(r => r.paid).reduce((a, r) => a + r.amt, 0), due = rows.filter(r => !r.paid).reduce((a, r) => a + r.amt, 0);
+  const list = rows.map(r => `<div class="li"><span class="d"><b class="num">${fMD(r.m, r.d)}</b><span>${WD[S.lang][wdOf(r.m, r.d)]}</span></span>
+    <span class="m"><b>${t.vs} ${r.opp}</b><span class="num">${t.ofPrice(pct(r.rate))}${r.sold ? `, ${t.sold}` : ''}</span></span>
+    <span class="v"><b class="num">${won(r.amt)}</b><span>${r.paid ? t.donePaid : t.due(r.due)}</span></span></div>`).join('');
+  return `<h1 class="big">${t.payback}</h1>
+  <div class="body">
+    <div class="total"><small>${t.seasonTotal}</small><b class="num">${won(paid + due)}</b><span class="num">${t.paidPart(won(paid), won(due))}</span></div>
+    <div class="list" style="margin-top:12px">${list}</div>
+    <div class="pad"><div class="note" style="margin-top:0">${t.payRule(RULES.paybackPaidDaysAfter)}</div></div>
+  </div>${tabs([['season', t.tabSeason, 'seat', 'h-tab'], ['payback', t.tabPayback, 'coin', 'h-tab']], 'payback')}`;
+}
+
+/* ==================================================================
+   6. 그리기와 조작
+================================================================== */
+function buyerApp(){ const B = S.buyer, t = L(), g = game(FOCUS);
+  const scr = B.screen === 'resale' ? b2() : B.screen === 'ticket' ? b3() : b1();
+  const p = B.push ? push(t.pushOpenT, t.pushOpenB(`${fDate(FOCUS)} ${matchup(g)}`), 'b-push') : '';
+  return scr + (B.sheet ? '' : toast(B.toast)) + p; }
+function holderApp(){ const H = S.holder, t = L(), g = game(FOCUS), rel = H.released[FOCUS];
+  const scr = H.tab === 'payback' ? h2() : h1();
+  const p = H.push && rel ? push(t.pushSoldT, t.pushSoldB(`${fDate(FOCUS)} ${matchup(g)}`, won(rel.amt), fDate(payDay(FOCUS))), 'h-push') : '';
+  return scr + (H.sheet ? '' : toast(H.toast)) + p; }
+function device(role, inner){ return `<div class="unit"><h2>${role === 'buyer' ? L().buyer : L().holder}</h2><div class="device"><div class="app" data-role="${role}"><div class="sbar"><span class="num">${clock(STORY[S.step].time)}</span><span>●●● ▮</span></div>${inner}</div></div></div>`; }
+
+function render(){
+  const t = L(), st = STORY[S.step], narrow = isNarrow();
+  const show = S.mode === 'both' && narrow ? 'buyer' : S.mode;
+  document.documentElement.lang = S.lang;
+  document.getElementById('pbar').innerHTML =
+    `<span class="lbl"><b>${t.pLabel}</b></span>` +
+    (S.test ? '' : `<span class="seg" role="group">${['buyer','holder','both'].filter(m => !(narrow && m === 'both')).map(m => `<button data-ctl="mode" data-arg="${m}" aria-pressed="${show === m}">${t[m]}</button>`).join('')}</span>`) +
+    `<span class="grp"><span>${t.nowIs}</span><b class="num">${fDate(st.day)} ${fTime(st.time)}</b></span>` +
+    `<button class="go" data-ctl="next" ${S.step >= STORY.length - 1 ? 'disabled' : ''}>${t.next[S.step]}</button>` +
+    `<button class="re" data-ctl="reset">${t.reset}</button><span class="sp"></span>` +
+    (S.test ? '' : `<span class="seg" role="group"><button data-ctl="lang" data-arg="ko" aria-pressed="${S.lang === 'ko'}">한국어</button><button data-ctl="lang" data-arg="en" aria-pressed="${S.lang === 'en'}">EN</button></span>`);
+  const parts = [];
+  if (show === 'holder' || show === 'both') parts.push(device('holder', holderApp()));
+  if (show === 'buyer' || show === 'both') parts.push(device('buyer', buyerApp()));
+  document.getElementById('stage').innerHTML = parts.join('');
+  document.documentElement.style.setProperty('--pbar-h', document.getElementById('pbar').offsetHeight + 'px');
+  const sh = document.querySelector('.sheet button'); if (sh && lastKey) sh.focus({ preventScroll: true });
+}
+let toastTimer = { buyer:0, holder:0 }, lastKey = false;
+function say(who, msg){ S[who].toast = msg; clearTimeout(toastTimer[who]); toastTimer[who] = setTimeout(() => { S[who].toast = ''; render(); }, 2600); }
+
+function act(name, arg){
+  const B = S.buyer, H = S.holder, t = L();
+  switch (name){
+    case 'b-alert': B.alert = !B.alert; say('buyer', B.alert ? t.alertDone(fDate(openDay(FOCUS), true), fTime(RULES.resaleOpenTime)) : t.alertCancel); break;
+    case 'b-go': B.screen = arg; B.sheet = null; B.push = false; break;
+    case 'b-tab': B.screen = arg === 'ticket' ? 'ticket' : (resaleOpen() ? 'resale' : 'game'); B.sheet = null; break;
+    case 'b-push': B.push = false; B.screen = 'resale'; break;
+    case 'b-sec': B.sheet = arg; break;
+    case 'b-close': B.sheet = null; break;
+    case 'b-pay': { const s = SECTIONS.find(x => x.id === B.sheet), seat = seatFor(s);
+      B.ticket = { sec: s.id, seat, mine: seat === MY_SEAT }; B.sheet = null; B.screen = 'ticket'; say('buyer', t.paid);
+      if (B.ticket.mine && S.mode !== 'buyer') H.push = true; break; }
+    case 'h-tab': H.tab = arg; H.sheet = null; break;
+    case 'h-open': H.sheet = Number(arg); break;
+    case 'h-close': H.sheet = null; break;
+    case 'h-release': doRelease(Number(arg)); H.sheet = null; say('holder', t.releasedToast); break;
+    case 'h-undo': delete H.released[Number(arg)]; H.sheet = null; say('holder', t.undoToast); break;
+    case 'h-push': H.push = false; H.tab = 'payback'; break;
+    default: return;
+  }
+  render();
+}
+function ctl(name, arg){
+  if (name === 'mode'){ S.mode = arg; fresh(); }
+  if (name === 'lang') S.lang = arg;
+  if (name === 'reset') fresh();
+  if (name === 'next' && S.step < STORY.length - 1){
+    S.step++; S.buyer.sheet = null; S.holder.sheet = null;
+    if (S.step === 1){ if (S.buyer.alert) S.buyer.push = true;
+      if (S.mode === 'holder' && isReleased(FOCUS)){ S.autoSold = true; S.holder.push = true; } }
+    if (S.step === 2){ S.buyer.push = false; if (S.buyer.ticket) S.buyer.screen = 'ticket'; else S.buyer.screen = 'game'; }
+  }
+  render();
+}
+document.addEventListener('click', e => {
+  const a = e.target.closest('[data-act]'); if (a && !a.disabled){ act(a.dataset.act, a.dataset.arg); return; }
+  const c = e.target.closest('[data-ctl]'); if (c && !c.disabled) ctl(c.dataset.ctl, c.dataset.arg);
+});
+document.addEventListener('keydown', e => { lastKey = true; if (e.key === 'Escape'){ S.buyer.sheet = null; S.holder.sheet = null; render(); } });
+document.addEventListener('pointerdown', () => { lastKey = false; });
+addEventListener('resize', render);
+
+/* 화면 바로 열기: 주소 끝에 ?s=b1, b1a, b2, b2c, b3, b3g, h1, h1s, h1r, h2 를 붙인다 (검수와 캡처용) */
+function preset(p){
+  if (!p) return;
+  S.mode = p === 'both' ? 'both' : /^b/.test(p) ? 'buyer' : 'holder'; fresh();
+  const rel = () => doRelease(FOCUS);
+  if (p === 'both'){ rel(); S.holder.sheet = null; S.buyer.alert = true; return; }
+  if (p === 'b1a'){ S.buyer.alert = true; }
+  if (p === 'b1o'){ S.buyer.alert = true; S.step = 1; S.buyer.push = true; }
+  if (p === 'b1g'){ S.step = 2; }
+  if (p === 'h1o'){ rel(); S.step = 1; S.autoSold = true; S.holder.push = true; }
+  if (['b2','b2c','b3','b3g'].includes(p)){ S.buyer.alert = true; S.step = 1; S.buyer.screen = 'resale'; }
+  if (p === 'b2c') S.buyer.sheet = 'cheer';
+  if (p === 'b3' || p === 'b3g'){ S.buyer.ticket = { sec:'cheer', seat: MY_SEAT, mine: true }; S.buyer.screen = 'ticket'; }
+  if (p === 'b3g') S.step = 2;
+  if (p === 'h1s') S.holder.sheet = FOCUS;
+  if (p === 'h1r'){ rel(); S.holder.sheet = FOCUS; }
+  if (p === 'h2'){ rel(); S.step = 1; S.autoSold = true; S.holder.tab = 'payback'; }
+}
+
+/* 데이터 점검: 숫자가 서로 맞는지 콘솔에서 확인한다 */
+const check = (ok, msg) => { if (!ok){ console.error('데이터 점검 실패: ' + msg); (window.__fail = window.__fail || []).push(msg); } };
+check(openDay(FOCUS) - deadlineDay(FOCUS) === 1, '마감 다음 날 재판매가 열려야 한다');
+check(RULES.paybackTiers.every((x, i, a) => !i || a[i-1].minDays > x.minDays), '페이백 구간은 이른 날부터 적는다');
+check(RULES.paybackTiers[RULES.paybackTiers.length - 1].minDays === RULES.releaseDeadlineDays, '마지막 구간은 내놓기 기한과 같아야 한다');
+check(FOCUS - STORY[0].day >= RULES.releaseDeadlineDays, '이야기 첫날에는 중심 경기의 자리를 내놓을 수 있어야 한다');
+
+applyMode(); preset(Q.get('s')); render();
+})();
+</script>
+</body>
+</html>
